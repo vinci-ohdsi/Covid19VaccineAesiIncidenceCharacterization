@@ -1,0 +1,4 @@
+cohortId,cohortName,fileName
+101,persons at risk at start of year 2017-2020 with >=365d prior observation,1JAN 2017-2020.sql
+102,persons at random visit in each calendar year 2017-2020 with >=365d prior observation,random visit 2017-2020.sql
+103,persons with influenza vaccine in 2017-2020 seasons,flu vaccine 2017-2020.sql
