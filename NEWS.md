@@ -1,3 +1,8 @@
+Covid19VaccineAesiIncidenceCharacterization 1.0.1
+==================
+
+Uploaded finalized protocol (less comments)
+
 Covid19VaccineAesiIncidenceCharacterization 1.0.0
 ==================
 
