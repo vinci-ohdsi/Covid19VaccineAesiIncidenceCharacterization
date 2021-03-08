@@ -16,8 +16,8 @@ server <- Sys.getenv("DB_SERVER")
 port <- Sys.getenv("DB_PORT")
 extraSettings <- if (Sys.getenv("DB_EXTRA_SETTINGS") == "") NULL else Sys.getenv("DB_EXTRA_SETTINGS")
 
-# For Oracle: define a schema that can be used to emulate temp tables:
-oracleTempSchema <- NULL
+# Define a schema that can be used to emulate temp tables:
+tempEmulationSchema <- NULL
 
 if (!is.null(connectionString)) {
   connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = dbms,
@@ -36,14 +36,28 @@ if (!is.null(connectionString)) {
 }
 
 # Details specific to the database:
-databaseId <- "IQVIA_FRANCE_V1375"
-databaseName <- "IQVIA_FRANCE_V1375"
-databaseDescription <- "IQVIA_FRANCE_V1375"
+databaseId <- "CDM_IQVIA_GERMANY_DA_V1049"
+databaseName <- "CDM_IQVIA_GERMANY_DA_V1049"
+databaseDescription <- "CDM_IQVIA_GERMANY_DA_V1049"
+# cdmDatabaseSchema <- "cdm"
+# cohortDatabaseSchema <- "scratch_asena5_lsc"
+# cohortTablePrefix <- "AESI"
 
 # Details for connecting to the CDM and storing the results
-cdmDatabaseSchema <- "cdm_1375"
-cohortDatabaseSchema <- "scratch_asena5_lsc"
-cohortTablePrefix <- "AESI"
+cdmDatabaseSchema <- "CDM_IQVIA_GERMANY_DA_V1049.dbo"
+cohortDatabaseSchema <- "scratch.dbo"
+cohortTablePrefix <- "AS_22FEB2021_AESI_"
+
+#  databaseId <- "CDM_OPTUM_EXTENDED_SES_v1522"
+#  databaseName <- "OPTUM_EXTENDED_SES_v1522"
+#  databaseDescription <- "OPTUM_EXTENDED_SES_v1522"
+# 
+# # Details for connecting to the CDM and storing the results
+#  cdmDatabaseSchema <- "CDM_OPTUM_EXTENDED_SES_v1522.dbo"
+#  cohortDatabaseSchema <- "scratch.dbo"
+#  cohortTablePrefix <- "PBR_21FEB2021_AESI_OptumSES"
+
+
 minCellCount <- 5
 
 # Set the folder for holding the study output
@@ -60,7 +74,7 @@ runStudy(connectionDetails = connectionDetails,
          cdmDatabaseSchema = cdmDatabaseSchema,
          cohortDatabaseSchema = cohortDatabaseSchema,
          cohortTablePrefix = cohortTablePrefix,
-         oracleTempSchema = cohortDatabaseSchema,
+         tempEmulationSchema = cohortDatabaseSchema,
          exportFolder = outputFolder,
          databaseId = databaseId,
          databaseName = databaseName,

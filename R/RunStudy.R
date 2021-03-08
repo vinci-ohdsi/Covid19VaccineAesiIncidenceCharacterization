@@ -1,8 +1,9 @@
+
 #' @export
 runStudy <- function(connectionDetails = NULL,
                      connection = NULL,
                      cdmDatabaseSchema,
-                     oracleTempSchema = NULL,
+                     tempEmulationSchema = NULL,
                      cohortDatabaseSchema,
                      cohortTablePrefix = "AESI",
                      targetCohortTable = paste0(cohortTablePrefix, "_target"),
@@ -68,13 +69,15 @@ runStudy <- function(connectionDetails = NULL,
   createRefTablesSql <- SqlRender::loadRenderTranslateSql("CreateRefTables.sql",
                                     packageName = getThisPackageName(),
                                     dbms = connection@dbms,
-                                    oracleTempSchema = oracleTempSchema,
+                                    tempEmulationSchema = tempEmulationSchema,
                                     warnOnMissingParameters = TRUE,
                                     cohort_database_schema = cohortDatabaseSchema,
+                                    summary_table = summaryTable,
                                     target_ref_table = targetRefTable,
                                     subgroup_ref_table = subgroupRefTable,
                                     outcome_ref_table = outcomeRefTable,
-                                    time_at_risk_table = timeAtRiskTable)
+                                    time_at_risk_table = timeAtRiskTable
+                                    )
   DatabaseConnector::executeSql(connection = connection,
                                 sql = createRefTablesSql,
                                 progressBar = TRUE,
@@ -95,7 +98,7 @@ runStudy <- function(connectionDetails = NULL,
     instantiatedTargetCohortIds <- instantiateCohortSet(connectionDetails = connectionDetails,
                                                         connection = connection,
                                                         cdmDatabaseSchema = cdmDatabaseSchema,
-                                                        oracleTempSchema = oracleTempSchema,
+                                                        tempEmulationSchema = tempEmulationSchema,
                                                         cohortDatabaseSchema = cohortDatabaseSchema,
                                                         cohortTable = targetCohortTable,
                                                         cohorts = targetCohorts,
@@ -129,7 +132,7 @@ runStudy <- function(connectionDetails = NULL,
     instantiateCohortSet(connectionDetails = connectionDetails,
                          connection = connection,
                          cdmDatabaseSchema = cdmDatabaseSchema,
-                         oracleTempSchema = oracleTempSchema,
+                         tempEmulationSchema = tempEmulationSchema,
                          cohortDatabaseSchema = cohortDatabaseSchema,
                          cohortTable = subgroupCohortTable,
                          cohorts = subgroupCohorts,
@@ -153,7 +156,7 @@ runStudy <- function(connectionDetails = NULL,
     instantiateCohortSet(connectionDetails = connectionDetails,
                          connection = connection,
                          cdmDatabaseSchema = cdmDatabaseSchema,
-                         oracleTempSchema = oracleTempSchema,
+                         tempEmulationSchema = tempEmulationSchema,
                          cohortDatabaseSchema = cohortDatabaseSchema,
                          cohortTable = outcomeCohortTable,
                          cohorts = outcomeCohortsToCreate,
@@ -202,7 +205,7 @@ runStudy <- function(connectionDetails = NULL,
   ParallelLogger::logInfo("**********************************************************")
   computeAndExportIncidenceAnalysis(connection,
                                     exportFolder,
-                                    oracleTempSchema, 
+                                    tempEmulationSchema, 
                                     cdmDatabaseSchema, 
                                     cohortDatabaseSchema,
                                     targetCohortTable,
@@ -221,13 +224,13 @@ runStudy <- function(connectionDetails = NULL,
   ParallelLogger::logInfo("Saving database metadata")
   op <- getObservationPeriodDateRange(connection,
                                       cdmDatabaseSchema = cdmDatabaseSchema,
-                                      oracleTempSchema = oracleTempSchema)
+                                      tempEmulationSchema = tempEmulationSchema)
   database <- data.frame(databaseId = databaseId,
                          databaseName = databaseName,
                          description = databaseDescription,
                          vocabularyVersion = getVocabularyInfo(connection = connection,
                                                                cdmDatabaseSchema = cdmDatabaseSchema,
-                                                               oracleTempSchema = oracleTempSchema),
+                                                               tempEmulationSchema = tempEmulationSchema),
                          minObsPeriodDate = op$minObsPeriodDate,
                          maxObsPeriodDate = op$maxObsPeriodDate,
                          isMetaAnalysis = 0)
@@ -239,21 +242,21 @@ runStudy <- function(connectionDetails = NULL,
   packageMetadata <- data.frame(packageId = getThisPackageName(),
                                 packageVersion = packageVersionNumber,
                                 executionDate = start,
-                                params = as.character(jsonlite::toJSON(list(targetCohortTable = targetCohortTable,
-                                                                            targetRefTable = targetRefTable,
-                                                                            subgroupCohortTable = subgroupCohortTable,
-                                                                            subgroupRefTable = subgroupRefTable,
-                                                                            outcomeCohortTable = outcomeCohortTable,
-                                                                            outcomeRefTable = outcomeRefTable,
-                                                                            timeAtRiskTable = timeAtRiskTable,
-                                                                            summaryTable = summaryTable,
-                                                                            exportFolder = exportFolder,
-                                                                            databaseId = databaseId,
-                                                                            databaseName = databaseName,
-                                                                            databaseDescription = databaseDescription,
-                                                                            minCellCount = minCellCount,
-                                                                            incremental = incremental,
-                                                                            incrementalFolder = incrementalFolder))))
+                                params = RJSONIO::toJSON(list(targetCohortTable = targetCohortTable,
+                                                              targetRefTable = targetRefTable,
+                                                              subgroupCohortTable = subgroupCohortTable,
+                                                              subgroupRefTable = subgroupRefTable,
+                                                              outcomeCohortTable = outcomeCohortTable,
+                                                              outcomeRefTable = outcomeRefTable,
+                                                              timeAtRiskTable = timeAtRiskTable,
+                                                              summaryTable = summaryTable,
+                                                              exportFolder = exportFolder,
+                                                              databaseId = databaseId,
+                                                              databaseName = databaseName,
+                                                              databaseDescription = databaseDescription,
+                                                              minCellCount = minCellCount,
+                                                              incremental = incremental,
+                                                              incrementalFolder = incrementalFolder)))
   writeToCsv(packageMetadata, file.path(exportFolder, "package.csv"))
   
   
@@ -269,7 +272,7 @@ runStudy <- function(connectionDetails = NULL,
 
 computeAndExportIncidenceAnalysis <- function(connection, 
                                               exportFolder,
-                                              oracleTempSchema, 
+                                              tempEmulationSchema, 
                                               cdmDatabaseSchema, 
                                               cohortDatabaseSchema,
                                               targetCohortTable,
@@ -282,34 +285,53 @@ computeAndExportIncidenceAnalysis <- function(connection,
                                               databaseName,
                                               summaryTable,
                                               minCellCount) {
-  # Run the analysis
-  runIncidenceAnalysisSql <- SqlRender::loadRenderTranslateSql("runIncidenceAnalysis.sql",
-                                                               packageName = getThisPackageName(),
-                                                               dbms = connection@dbms,
-                                                               oracleTempSchema = oracleTempSchema,
-                                                               warnOnMissingParameters = TRUE,
-                                                               cdm_database_schema = cdmDatabaseSchema,
-                                                               cohort_database_schema = cohortDatabaseSchema,
-                                                               target_cohort_table = targetCohortTable,
-                                                               target_ref_table = targetRefTable,
-                                                               subgroup_cohort_table = subgroupCohortTable,
-                                                               subgroup_ref_table = subgroupRefTable,
-                                                               outcome_cohort_table = outcomeCohortTable,
-                                                               outcome_ref_table = outcomeRefTable,
-                                                               time_at_risk_table = timeAtRiskTable,
-                                                               database_name = databaseName,
-                                                               summary_table = summaryTable)
-  DatabaseConnector::executeSql(connection = connection,
-                                sql = runIncidenceAnalysisSql,
-                                progressBar = TRUE,
-                                reportOverallTime = TRUE)
   
+  # Run the analyses as specified in the settings/analysisSettings.json file 
+  analysisListFile <- system.file("settings/analysisSettings.json", package = getThisPackageName(), mustWork = TRUE)
+  analysisListJsonFromFile <- paste(readLines(analysisListFile),collapse="\n");
+  analysisList <- RJSONIO::fromJSON(analysisListJsonFromFile)
+  
+  
+  for(i in 1:length(analysisList$analysisList)) {
+    ParallelLogger::logInfo(paste0("(", i, "/", length(analysisList$analysisList), "): ", analysisList$analysisList[[i]]$name))
+    targetIds <- analysisList$analysisList[[i]]$targetIds
+    subgroupIds <- analysisList$analysisList[[i]]$subgroupIds
+    timeAtRiskIds <- analysisList$analysisList[[i]]$timeAtRiskIds
+    outcomeIds <- analysisList$analysisList[[i]]$outcomeIds
+    
+    
+    runIncidenceAnalysisSql <- SqlRender::loadRenderTranslateSql("runIncidenceAnalysis.sql",
+                                                                 packageName = getThisPackageName(),
+                                                                 dbms = connection@dbms,
+                                                                 tempEmulationSchema = tempEmulationSchema,
+                                                                 warnOnMissingParameters = TRUE,
+                                                                 cdm_database_schema = cdmDatabaseSchema,
+                                                                 cohort_database_schema = cohortDatabaseSchema,
+                                                                 target_cohort_table = targetCohortTable,
+                                                                 target_ref_table = targetRefTable,
+                                                                 target_ids = targetIds,
+                                                                 subgroup_cohort_table = subgroupCohortTable,
+                                                                 subgroup_ref_table = subgroupRefTable,
+                                                                 subgroup_ids = subgroupIds,
+                                                                 outcome_cohort_table = outcomeCohortTable,
+                                                                 outcome_ref_table = outcomeRefTable,
+                                                                 outcome_ids = outcomeIds,
+                                                                 time_at_risk_table = timeAtRiskTable,
+                                                                 time_at_risk_ids = timeAtRiskIds,
+                                                                 database_name = databaseName,
+                                                                 summary_table = summaryTable)
+    DatabaseConnector::executeSql(connection = connection,
+                                  sql = runIncidenceAnalysisSql,
+                                  progressBar = TRUE,
+                                  reportOverallTime = TRUE)
+  }
+
   # Export & Censor results
   ParallelLogger::logInfo("Exporting analysis results")
   getIncidenceAnalysisSql <- SqlRender::loadRenderTranslateSql("GetIncidenceAnalysisResults.sql",
                                                                packageName = getThisPackageName(),
                                                                dbms = connection@dbms,
-                                                               oracleTempSchema = oracleTempSchema,
+                                                               tempEmulationSchema = tempEmulationSchema,
                                                                warnOnMissingParameters = TRUE,
                                                                cohort_database_schema = cohortDatabaseSchema,
                                                                summary_table = summaryTable)
@@ -331,11 +353,11 @@ computeAndExportIncidenceAnalysis <- function(connection,
   writeToCsv(results, file.path(exportFolder, "incidence_analysis.csv"))
 }
 
-insertRefEntries <- function(connection, sqlFile, cohortDatabaseSchema, tableName, oracleTempSchema, ...) {
+insertRefEntries <- function(connection, sqlFile, cohortDatabaseSchema, tableName, tempEmulationSchema, ...) {
   sql <- SqlRender::loadRenderTranslateSql(sqlFile,
                                            packageName = getThisPackageName(),
                                            dbms = connection@dbms,
-                                           oracleTempSchema = oracleTempSchema,
+                                           tempEmulationSchema = tempEmulationSchema,
                                            warnOnMissingParameters = TRUE,
                                            cohort_database_schema = cohortDatabaseSchema,
                                            ref_table = tableName,
@@ -355,22 +377,22 @@ zipResults <- function(exportFolder, databaseId) {
   return(zipName)
 }
 
-getVocabularyInfo <- function(connection, cdmDatabaseSchema, oracleTempSchema) {
+getVocabularyInfo <- function(connection, cdmDatabaseSchema, tempEmulationSchema) {
   sql <- "SELECT vocabulary_version FROM @cdm_database_schema.vocabulary WHERE vocabulary_id = 'None';"
   sql <- SqlRender::render(sql, cdm_database_schema = cdmDatabaseSchema)
   sql <- SqlRender::translate(sql,
                               targetDialect = attr(connection, "dbms"),
-                              oracleTempSchema = oracleTempSchema)
+                              tempEmulationSchema = tempEmulationSchema)
   vocabInfo <- DatabaseConnector::querySql(connection, sql)
   return(vocabInfo[[1]])
 }
 
-getObservationPeriodDateRange <- function(connection, cdmDatabaseSchema, oracleTempSchema) {
+getObservationPeriodDateRange <- function(connection, cdmDatabaseSchema, tempEmulationSchema) {
   sql <- "SELECT MIN(observation_period_start_date) min_obs_period_date, MAX(observation_period_end_date) max_obs_period_date FROM @cdm_database_schema.observation_period;"
   sql <- SqlRender::render(sql, cdm_database_schema = cdmDatabaseSchema)
   sql <- SqlRender::translate(sql,
                               targetDialect = attr(connection, "dbms"),
-                              oracleTempSchema = oracleTempSchema)
+                              tempEmulationSchema = tempEmulationSchema)
   op <- DatabaseConnector::querySql(connection, sql)
   names(op) <- SqlRender::snakeCaseToCamelCase(names(op))
   return(op)
