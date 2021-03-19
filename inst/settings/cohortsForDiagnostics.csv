@@ -1,0 +1,28 @@
+cohortId,cohortName,fileName,cohortType,atlasId,name,cohortFullName
+105,persons at risk at start of year 2017-2019 with >=365d prior observation AND >=1 at risk condition excluding pregnancy,1JAN 2017-2019 at-risk.sql,target,100,1JAN 2017-2019 at-risk,1JAN 2017-2019 at-risk
+106,persons at risk at start of year 2017-2019 with >=365d prior observation AND =0 at risk condition including pregnancy,1JAN 2017-2019 not-at-risk.sql,target,100,1JAN 2017-2019 not-at-risk,1JAN 2017-2019 not-at-risk
+126,persons at risk at start of year 2017-2019 with >=365d prior observation AND pregnant episode covering index (pregnancy start < 1JAN and pregnancy end >=1JAN),1JAN 2017-2019 pregnant.sql,target,100,1JAN 2017-2019 pregnant,1JAN 2017-2019 pregnant
+328,Anaphylaxis FDA ICD10 source concepts,Anaphylaxis FDA.sql,outcome,100,Anaphylaxis FDA,Anaphylaxis FDA
+363,Anaphylaxis IPED,Anaphylaxis IPED.sql,outcome,100,Anaphylaxis IPED,Anaphylaxis IPED
+329,Appendicitis FDA ICD10 source concepts,Appendicitis FDA.sql,outcome,100,Appendicitis FDA,Appendicitis FDA
+330,Bells palsy FDA ICD10 source concepts,BellsPalsy FDA.sql,outcome,100,BellsPalsy FDA,BellsPalsy FDA
+315,Deep vein thrombosis,DeepVeinThrombosis.sql,outcome,100,DeepVeinThrombosis,DeepVeinThrombosis
+331,Deep vein thrombosis FDA ICD10 source concepts,DeepVeinThrombosis FDA.sql,outcome,100,DeepVeinThrombosis FDA,DeepVeinThrombosis FDA
+334,Disseminated intravascular coagulation FDA ICD10 source concepts,DisIntraCoag_FDA.sql,outcome,100,DisIntraCoag_FDA,DisIntraCoag_FDA
+336,Seizure disorder (epilepsy),SeizureDisorder.sql,outcome,100,SeizureDisorder,SeizureDisorder
+338,Encephalomyelitis IP FDA ICD10 source concepts,Encephalomyelitis IP FDA.sql,outcome,100,Encephalomyelitis IP FDA,Encephalomyelitis IP FDA
+324,Hemorrhagic stroke IP,HemorrhagicStroke IP.sql,outcome,100,HemorrhagicStroke IP,HemorrhagicStroke IP
+339,Hemorrhagic stroke IP FDA ICD10 source concepts,HemorrhagicStroke IP FDA.sql,outcome,100,HemorrhagicStroke IP FDA,HemorrhagicStroke IP FDA
+356,Hemorrhagic stroke IP first occurrence,HemorrhagicStroke IP.sql,outcome,100,HemorrhagicStroke IP,HemorrhagicStroke IP
+340,Immune thrombocytopenia FDA ICD10 source concepts,ImmuneThrombocytopenia FDA.sql,outcome,100,ImmuneThrombocytopenia FDA,ImmuneThrombocytopenia FDA
+341,Myocarditis pericarditis FDA ICD10 source concepts,MyocarditisPericarditis FDA.sql,outcome,100,MyocarditisPericarditis FDA,MyocarditisPericarditis FDA
+310,Non-hemorrhagic stroke IP,NonHemorrhagicStroke IP.sql,outcome,100,NonHemorrhagicStroke IP,NonHemorrhagicStroke IP
+311,Non-hemorrhagic stroke,NonHemorrhagicStroke.sql,outcome,100,NonHemorrhagicStroke,NonHemorrhagicStroke
+342,Non-hemorrhagic stroke IP FDA ICD10 source concepts,NonHemorrhagicStroke IP FDA.sql,outcome,100,NonHemorrhagicStroke IP FDA,NonHemorrhagicStroke IP FDA
+360,Non-hemorrhagic stroke IP first occurrence,NonHemorrhagicStroke IP.sql,outcome,100,NonHemorrhagicStroke IP,NonHemorrhagicStroke IP
+364,Non-hemorrhagic stroke broad,NonHemorrhagicStroke broad.sql,outcome,100,NonHemorrhagicStroke broad,NonHemorrhagicStroke broad
+316,Pulmonary embolism,PulmonaryEmbolism.sql,outcome,100,PulmonaryEmbolism,PulmonaryEmbolism
+343,Pulmonary embolism IP,PulmonaryEmbolism IP.sql,outcome,100,PulmonaryEmbolism IP,PulmonaryEmbolism IP
+344,Pulmonary embolism FDA ICD10 source concepts,PulmonaryEmbolism FDA.sql,outcome,100,PulmonaryEmbolism FDA,PulmonaryEmbolism FDA
+361,Pulmonary embolism first occurrence,PulmonaryEmbolism.sql,outcome,100,PulmonaryEmbolism,PulmonaryEmbolism
+317,Transverse myelitis IP,TransverseMyelitis IP.sql,outcome,100,TransverseMyelitis IP,TransverseMyelitis IP
