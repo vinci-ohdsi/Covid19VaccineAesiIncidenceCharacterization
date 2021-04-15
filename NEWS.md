@@ -1,3 +1,9 @@
+Covid19VaccineAesiIncidenceCharacterization 1.1.0
+==================
+
+1. Added Day O Time-at-risk settings
+2. Added Target cohort: Persons at risk at 1APR 2017-2019 with >=365d prior observation with >=1 visit in next year index 1APR
+
 Covid19VaccineAesiIncidenceCharacterization 1.0.1
 ==================
 

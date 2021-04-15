@@ -293,7 +293,7 @@
 		},
 		"Covid19VaccineAesiIncidenceCharacterization" : {
 			"Package" : "Covid19VaccineAesiIncidenceCharacterization",
-			"Version" : "1.0.1",
+			"Version" : "1.1.0",
 			"Source" : "GitHub",
 			"RemoteType" : "github",
 			"RemoteHost" : "api.github.com",
