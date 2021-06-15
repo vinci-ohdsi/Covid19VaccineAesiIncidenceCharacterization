@@ -3,7 +3,7 @@ Executing the study package
 
 **NOTE**: This guide assumes you have performed the steps in the [study package setup guide](STUDY-PACKAGE-SETUP.md). 
 
-This guide will take you through the process of running the study to produce cohort diagnostics and the characterization results. 
+This guide will take you through the process of running the study to produce the characterization results. 
 
 ## How to Run the Study
 1. In `R`, you will build an `.Renviron` file. An `.Renviron` is an R environment file that sets variables you will be using in your code. It is encouraged to store these inside your environment so that you can protect sensitive information. Below are brief instructions on how to do this:
